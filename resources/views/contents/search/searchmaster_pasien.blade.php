@@ -30,7 +30,7 @@
                         @endcan
                         @can('access-pendaftaran')
                             @php
-                                $results = DB::table('rekam_medis.pendaftaran')
+                                $results = DB::table('pendaftaran')
                                     ->where('no_rekmed', $item->no_rekmed)
                                     ->whereDate('tgl_daftar', now()->format('Y-m-d'))
                                     ->where('status', 'Belum Periksa')
