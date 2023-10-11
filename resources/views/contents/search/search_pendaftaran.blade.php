@@ -17,22 +17,42 @@
     <script>
         var isSelect = false;
         var jadwalIdDokter = "";
+        var arrayPilihDokter = [];
+        var arrayListJdwDokter = [];
 
         function selectDokter(index, idjadwaldokter) {
-            $("#selectContentBase > div > div").each(function () {
-                $(this).css("background-color", "");
-            });
-            $("#selectContentBase > div").eq(index).find("> div").css("background-color", "cornsilk");
-            jadwalIdDokter = idjadwaldokter;
-            isSelect = true;
-            $("#idjdwdokter_pasienbaru").val(idjadwaldokter);
+            // $("#selectContentBase > div > div").each(function () {
+            //     $(this).css("background-color", "");
+            // });
+            let indeksPilihDokter = arrayPilihDokter.indexOf(index);
+            let indeksListJdwDokter = arrayListJdwDokter.indexOf(idjadwaldokter);
+
+            if (indeksListJdwDokter !== -1) {
+                arrayListJdwDokter.splice(indeksListJdwDokter, 1);
+            } else {
+                arrayListJdwDokter.push(idjadwaldokter);
+            }
+
+            if (indeksPilihDokter !== -1) {
+                arrayPilihDokter.splice(indeksPilihDokter, 1);
+                $("#selectContentBase > div").eq(index).find("> div").css("background-color", "");
+            } else {
+                arrayPilihDokter.push(index);
+                $("#selectContentBase > div").eq(index).find("> div").css("background-color", "cornsilk");
+            }
+            
+            if(arrayPilihDokter.length > 0){
+                isSelect = true;   
+            }
         }
 
-        $("#executeSelectBtnOnclick").on("click", function () {
+        $('#divExecuteSelect button:eq(1)').click(function() {
             var $div = $("div").find(".rounded-md.flex.items-center.px-5.py-4.mb-2.bg-theme-6.text-white");
-            let isValid = true;
-
+         
             if (isSelect) {
+                jadwalIdDokter = arrayListJdwDokter.join(";");
+                $("#idjdwdokter_pasienbaru").val(jadwalIdDokter);
+                
                 $div.css("display", "none");
                 $("#selectForm").append(
                     $("<input>")
@@ -42,10 +62,13 @@
                             "value": jadwalIdDokter,
                         })
                 );
+
                 $("#selectForm").submit();
             } else {
                 event.preventDefault();
                 $div.css("display", "");
             }
         });
+
+
     </script>

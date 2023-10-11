@@ -60,6 +60,8 @@ Route::middleware('auth')->group(function () {
     Route::post('spesialistik/rekammedis/{id?}', [SpesialistikController::class, 'storePemeriksaan'])->name("storepemeriksaan")->middleware('can:access-dokter');
     Route::get('spesialistik/rekammedis/{id?}', [SpesialistikController::class, 'rekammedis'])->name("rekammedis-spesialistik")->middleware('can:access-dokter');
     Route::get('spesialistik/rekammedis/{id?}/detail', [SpesialistikController::class, 'detailRekammedis'])->name("detailrekammedis-spesialistik")->middleware('can:access-dokter');
+    Route::post('spesialistik/rekammedis/{id?}/manipulasi', [SpesialistikController::class, 'manipulasiRekammedis'])->name("manipulasirekammedis-spesialistik")->middleware('can:access-dokter');
+    Route::get('spesialistik/rekammedis/{id?}/rujukan', [SpesialistikController::class, 'rujukan'])->name("rujukan-spesialistik")->middleware('can:access-dokter');
 
     Route::get('spesialistik/addresep', [SpesialistikController::class, 'addResep'])->name("addresep")->middleware('can:access-dokter');
 

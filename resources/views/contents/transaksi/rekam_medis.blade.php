@@ -8,6 +8,7 @@
         <!-- END: Breadcrumb -->
         <!-- BEGIN: Account Menu -->
        @include('components.account_dropdown')
+       @include('components.modal.delete_rekam_medis_modal')
         <!-- END: Account Menu -->
     </div>
     <!-- END: Top Bar -->
@@ -19,6 +20,22 @@
         </div>
        
         <script>
+            var list_id_resep = [];
+            function ubahcatatanrm(status){
+               if(status == "tampil_ubah"){
+                $(".origindiv").css("display", "none");
+                $(".editablediv:not(.strict_id)").css("display", "");
+               }
+               else{
+                    $("div .bg-theme-14").click();
+                    list_id_resep.length = 0;
+               }
+            }
+            function hapusresep_rm(id){
+                list_id_resep.push(id);
+            }
+           
+
             let currentlySelectedElement = null;
                   function detailrm(idvs, element){
                       $.ajax({
@@ -34,6 +51,7 @@
                               currentlySelectedElement = element;
       
                               $('#detail_rekam_medis').html(data);
+                              $.getScript("{{ asset('dist/js/app.js')}}", function() {});
                           }
                       });
                   }
@@ -53,8 +71,18 @@
                   <div class="intro-y pr-1">
                       <div class="box p-2">Rentang tanggal
                           <div class="relative text-gray-700 dark:text-gray-300" style="padding: 10px;">
-                              <div class="relative w-56 mx-auto"> <div class="absolute rounded-l w-10 h-full flex items-center justify-center bg-gray-100 border text-gray-600 dark:bg-dark-1 dark:border-dark-4"> <i data-feather="calendar" class="w-4 h-4"></i> </div> <input type="text" class="datepicker input pl-12 border" data-daterange="true"> </div>
+                              <div class="relative w-56 mx-auto"> <div class="absolute rounded-l w-10 h-full flex items-center justify-center bg-gray-100 border text-gray-600 dark:bg-dark-1 dark:border-dark-4"> <i data-feather="calendar" class="w-4 h-4"></i> </div> <input id="datepickerRM" type="text" class="datepicker input pl-12 border" data-daterange="true"> </div>
                           </div>
+                          @if ($tgl_rm)
+                                <div id="tgl_awal_rm" style="display: none">{{ $tgl_rm->tgl_awal }}</div>
+                                <div id="tgl_akhir_rm" style="display: none">{{ $tgl_rm->tgl_akhir }}</div>
+                            @endif
+                        
+                          <script>
+                            var tglawal = $("#tgl_awal_rm").text();
+                            var tglakhir = $("#tgl_akhir_rm").text();
+                           $("#datepickerRM").val(tglawal+" - "+tglakhir)
+                          </script>
                           <div class="flex justify-center">
                             <button id="btnRentangTgl" type="button" class="button w-18 mr-1 mb-2 bg-gray-200 text-gray-600"> Tampilkan </button>
                           </div>
@@ -87,6 +115,46 @@
             </div>
 
             <script>
+                function setujumanipulasirm(){
+                    let data = {'manipulasi_rm':'ada',  _token: '{{ csrf_token() }}'};
+
+                    var  listManipulasiResep = "";
+
+                    
+                    $('.editablediv').find('input').each(function() {
+                        data[$(this).attr('name')] = $(this).val();
+                    });
+                
+
+                    $('tbody tr.editablediv').each(function(index) {
+                         listManipulasiResep += "UPDATE resep_obat SET ";
+
+                        $('tbody tr#tr_editable_'+index+' td:not(:first) div').each(function() {
+                             listManipulasiResep += $(this).attr('class')+"='"+ $(this).text()+ "',";
+                        });
+                         listManipulasiResep += " WHERE id_resep_obat= "+ $('tbody tr#tr_editable_'+index+' td:first div').text()+"; ";
+                    });
+
+                    if(list_id_resep.length > 0){
+                        listManipulasiResep += "DELETE FROM resep_obat WHERE id_resep_obat IN ("+list_id_resep.toString()+");";
+                    }
+                    
+
+                    data["manipulasi_resep"] = listManipulasiResep;
+
+                    $.ajax({
+                        type: "POST",
+                        url: window.location.href+"/manipulasi",
+                        data: data,
+                        success: function(response) {
+                            $("div .bg-theme-14").click();
+                        },
+                        error: function(error) {
+                            // Handle error di sini (jika ada kesalahan)
+                        }
+                    });
+                }
+
                 $(document).ready(function() {
                     var startDate = "";
                     var endDate =  "";

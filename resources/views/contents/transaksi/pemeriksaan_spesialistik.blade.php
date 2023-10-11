@@ -1,11 +1,13 @@
 <div id="contentPemeriksaan" style="display: none">
-    <div class="intro-y flex items-center mt-8">
+    <div class="intro-y flex items-center mt-3">
         <h2 class="text-lg font-medium mr-auto" style="font-size: 30px;">
             Pemeriksaan
         </h2>
     </div>
     @include('components.modal.konfirmasi_pemeriksaan_modal')
+    @include('components.modal.rujukan_modal')
     <!-- BEGIN: Form Layout -->
+
     <div class="intro-y box py-10 sm:py-20 mt-5">
         <div class="wizard flex flex-col lg:flex-row justify-center px-5 sm:px-20">
             <div class="intro-x lg:text-center flex items-center lg:block flex-1 z-10">
@@ -236,15 +238,18 @@
             $('#formRequestor').submit(function(event) {
                 event.preventDefault(); 
                 var formData = $('#formRequestor').serialize();
+                var parsedUrl = new URL(window.location.href);
+                var host = parsedUrl.host;
+
                 $.ajax({
                     type: 'POST', 
                     url: window.location.href, 
                     data: formData, 
                     success: function(response) {
-                        window.open("http://127.0.0.1:8000/spesialistik/cetakpdf/"+lastSegment.replace('vs', 'sps'), '_blank');
+                        window.open("http://"+host+"/spesialistik/cetakpdf/"+lastSegment.replace('vs', 'sps'), '_blank');
                         setTimeout(function() {
-                            window.open("http://127.0.0.1:8000/spesialistik/")
-                        }, 5000);
+                            window.location.href = "http://"+host+"/spesialistik/";
+                        }, 2000);
                         
                     },
                     error: function(error) {

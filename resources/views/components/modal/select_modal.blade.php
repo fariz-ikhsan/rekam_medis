@@ -53,9 +53,9 @@
             @csrf
             <div id="divExecuteSelect" class="px-5 py-3 text-right border-t border-gray-200 dark:border-dark-5">
                 <button type="button" data-dismiss="modal" class="button w-20 border text-gray-700 dark:border-dark-5 dark:text-gray-300 mr-1">Batalkan</button>
-                    <button type="button" class="button mr-5 mb-2 inline-flex items-center justify-center bg-theme-10 text-white">
-                        <span style="margin-right: 5px;">Simpan</span>
-                    </button>
+                <button type="button" class="button mr-5 mb-2 inline-flex items-center justify-center bg-theme-10 text-white">
+                    <span style="margin-right: 5px;">Simpan</span>
+                </button>
             </div>
         </form>  
     </div>

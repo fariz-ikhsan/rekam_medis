@@ -161,20 +161,15 @@ class SpesialistikController extends Controller
         ->where('no_rekmed', $no_rm->no_rekmed)
         ->get();
 
+        $tglrm = DB::table('pendaftaran')
+                ->select(DB::raw('min(tgl_daftar) as tgl_awal'), DB::raw('max(tgl_daftar) as tgl_akhir'))
+                ->where('no_rekmed', $no_rm->no_rekmed)
+                ->first();
+
         if (!count($request->all())) {
+           
+            return view ('contents.transaksi.rekam_medis')->with(["datadokter"=> $dktdata, "rm_psn" => $rm_psn, "tgl_rm"=> $tglrm]);
             
-      
-            return view ('contents.transaksi.rekam_medis')->with(["datadokter"=> $dktdata, "rm_psn" => $rm_psn]);
-                  // $rm = DB::table('vital_sign AS vs')
-            //     ->select('vs.id_vitalsign','pdf.no_rekmed', 'pdf.tgl_daftar', 'vs.berat_badan', 'vs.tekanan_darah', 'vs.denyut_nadi', 'vs.spo2', 'vs.suhu', 'vs.respiration_rate', 'pemsps.diagnosa_utama', 'pemsps.komplikasi', 'pemsps.diagnosa_tambahan', 'pemsps.tindakan_medis')
-            //     ->join('pendaftaran AS pdf', 'pdf.id_pendaftaran', '=', 'vs.id_pendaftaran')
-            //     ->join('pemeriksaan_spesialistik AS pemsps', 'pemsps.id_vitalsign', '=', 'vs.id_vitalsign')
-            //     ->where('pdf.no_rekmed', '=', $no_rm->no_rekmed)
-            //     ->get();
-
-            // return view ('contents.transaksi.rekam_medis')->with(["datadokter"=> $dktdata,'data', $rm]);
-
-
         }else{
             if($request->ajax()){
                 $searchData = $request->searchdata;
@@ -220,18 +215,51 @@ class SpesialistikController extends Controller
         }
     }
     
+    public function manipulasiRekammedis(Request $request){
+        if($request->ajax()){
+            if($request->manipulasi_rm){
+                $manipulasi_resep = $request->manipulasi_resep;
+                $manipulasi_resep = str_replace("UPDATE resep_obat SET  WHERE id_resep_obat= ;", "", $manipulasi_resep);
+                $manipulasi_resep = str_replace("', WHERE", "' WHERE", $manipulasi_resep);
+            
+                DB::table('pemeriksaan_spesialistik')
+                ->where('id_spesialistik', $request->id_spesialistik)
+                ->update([
+                    'diagnosa_utama' => $request->diagnosa_utama,
+                    'komplikasi' => $request->komplikasi,
+                    'diagnosa_tambahan' => $request->diagnosa_tambahan,
+                    'tindakan_medis' => $request->tindakan_medis,
+                ]);
+
+                DB::table('catatan_khusus')
+                ->where('id_catkhusus', $request->id_catkhusus)
+                ->update([
+                    'alergi' => $request->alergi,
+                    'tranfusi' => $request->tranfusi,
+                    'gol_darah' => $request->gol_darah,
+                    'penyakit_berat' => $request->penyakit_berat,
+                    'penyakit_menular' => $request->penyakit_menular
+                ]);
+                DB::unprepared($manipulasi_resep);
+            }
+        
+        }
+        return "Sukses";
+    }
     
     public function detailRekammedis(Request $request)
     {
+        $datadokter = Session::get('dokter');
         if($request->ajax()){
             $searchData = $request->searchdata;
             $data = DB::table('vital_sign as vs')
                         ->select(
-                            'dkt.nama as dokter_nama', 'pdf.tgl_daftar','ro.dosis', 'ro.tipe','ro.catatan',
+                            'dkt.id_dokter','dkt.nama as dokter_nama', 'pdf.tgl_daftar','ro.dosis', 'ro.tipe','ro.catatan',
                             'vs.berat_badan', 'vs.tekanan_darah', 'vs.denyut_nadi', 'vs.spo2', 'vs.suhu', 'vs.respiration_rate',
                             'pemsps.id_spesialistik','pemsps.diagnosa_utama', 'pemsps.komplikasi', 'pemsps.diagnosa_tambahan', 'pemsps.tindakan_medis',
                             'ro.nama_obat', 'ro.dosis', 'ro.tipe', 'ro.catatan',
-                            'ck.alergi', 'ck.tranfusi', 'ck.gol_darah', 'ck.penyakit_berat', 'ck.penyakit_menular'
+                            'ck.id_catkhusus','ck.alergi', 'ck.tranfusi', 'ck.gol_darah', 'ck.penyakit_berat', 'ck.penyakit_menular',
+                            'pdf.tgl_daftar'
                             )
                             ->join('pemeriksaan_spesialistik as pemsps', 'pemsps.id_vitalsign', '=', 'vs.id_vitalsign')
                             ->leftJoin('resep_obat as ro', 'ro.id_spesialistik', '=', 'pemsps.id_spesialistik')
@@ -244,36 +272,68 @@ class SpesialistikController extends Controller
 
             $resepObatData = DB::table('resep_obat')
                             ->join('pemeriksaan_spesialistik as pemsps', 'pemsps.id_spesialistik', '=', 'resep_obat.id_spesialistik')
-                            ->select('nama_obat', 'dosis', 'tipe', 'catatan','satuan')
+                            ->select('id_resep_obat','nama_obat', 'dosis', 'tipe', 'catatan','satuan')
                             ->where('pemsps.id_spesialistik', $data->pluck("id_spesialistik")[0])
                             ->get();
 
             $output=''; $resepObat = '';
             if(count($data)>0){
 
-            foreach($resepObatData as $rso){
-                $resepObat .='<tr>
+            foreach($resepObatData as $index => $rso){
+                $resepObat .='<tr class="origindiv">
+                                <td style="display:none;">'.$rso->id_resep_obat.'</td>
                                 <td class="border-b dark:border-dark-5">'.$rso->nama_obat.'</td>
                                 <td class="border-b dark:border-dark-5">'.$rso->tipe.'</td>
                                 <td class="border-b dark:border-dark-5">'.$rso->dosis.'</td>
                                 <td class="border-b dark:border-dark-5">'.$rso->satuan.'</td>
                                 <td class="border-b dark:border-dark-5">'.$rso->catatan.'</td>
+                                <td class="editablediv" style="display:none;">
+                                </td>
+                            </tr>
+                            <tr id="tr_editable_'.$index.'" class="editablediv" style="display:none;">
+                                <td style="display:none;"><div>'.$rso->id_resep_obat.'</div></td>
+                                <td class="border-b dark:border-dark-5"><div class="nama_obat" style=" border: 1px solid gray;" contenteditable>'.$rso->nama_obat.'</div></td>
+                                <td class="border-b dark:border-dark-5"><div class="tipe" style=" border: 1px solid gray;" contenteditable>'.$rso->tipe.'</div></td>
+                                <td class="border-b dark:border-dark-5"><div class="dosis" style=" border: 1px solid gray;" contenteditable>'.$rso->dosis.'</div></td>
+                                <td class="border-b dark:border-dark-5"><div class="satuan" style=" border: 1px solid gray;" contenteditable>'.$rso->satuan.'</div></td>
+                                <td class="border-b dark:border-dark-5"><div class="catatan" style=" border: 1px solid gray;" contenteditable>'.$rso->catatan.'</div></td>
+                                <td class="editablediv" style="display:none;">
+                                    <button onclick="this.closest(\'tr\').remove(); hapusresep_rm(\''.$rso->id_resep_obat.'\');" type="button" class="button w-15 mr-2 mb-2 flex items-center justify-center bg-theme-6 text-white"> <i data-feather="trash-2" class="w-4 h-4 mr-2"></i> Delete </button>
+                                </td>
                             </tr>';
                 }
-              
-            $output ='<div class="intro-y text-justify leading-relaxed">';
+               
+            $output =''; 
             
             foreach($data as $index => $item){
                 if($index < 1){
+                    $btn ='';
+                    if($datadokter[0]->id_dokter == $item->id_dokter){
+                        $btn ='<div> <button type="button" onclick="ubahcatatanrm(\'tampil_ubah\')" type="button" class="button w-18 mr-1 mb-2 bg-theme-1 text-white">Ubah Catatan</button> </div>';
+                    }
                     $output .='
+                    <div class="intro-y text-justify leading-relaxed">
+                       <div class="border-b border-gray-200 dark:border-dark-5 px-5 py-4" style="display: flex; justify-content: space-between;">
+                                <div class="text-base font-medium">Dokter: '.$item->dokter_nama.'</div>
+                                <div class="text-base">Tgl Periksa: '.\Carbon\Carbon::parse($item->tgl_daftar)->format("j M, Y").'</div>
+                        '.$btn.'
+                        </div>
+                        <div class="editablediv strict_id" style="display:none;"> <input name="id_spesialistik" type="text" class="input border flex-1" style="background-color:whitesmoke; width:50%;" required value="'.$item->id_spesialistik.'"> </div>
                         <a class="block font-medium text-base mt-5">Diagnosa Utama</a>
-                        <p class="mb-5">'.$item->diagnosa_utama.'</p>
+                        <div class="origindiv"> <p class="mb-5">'.$item->diagnosa_utama.'</p> </div>
+                        <div class="editablediv" style="display:none;"> <input name="diagnosa_utama" type="text" class="input border flex-1" style="background-color:whitesmoke; width:50%;" required value="'.$item->diagnosa_utama.'"> </div>
+                        
                         <a class="block font-medium text-base mt-5">Komplikasi</a>
-                        <p class="mb-5">'.$item->komplikasi.'</p>
+                        <div class="origindiv"> <p class="mb-5">'.$item->komplikasi.'</p> </div>
+                        <div class="editablediv" style="display:none;"> <input name="komplikasi" type="text" class="input border flex-1" style="background-color:whitesmoke; width:50%;" required value="'.$item->komplikasi.'"> </div>
+                        
                         <a class="block font-medium text-base mt-5">Diagnosa Tambahan</a>
-                        <p class="mb-5">'.$item->diagnosa_tambahan.'</p>
+                        <div class="origindiv"> <p class="mb-5">'.$item->diagnosa_tambahan.'</p> </div>
+                        <div class="editablediv" style="display:none;"> <input name="diagnosa_tambahan" type="text" class="input border flex-1" style="background-color:whitesmoke; width:50%;" required value="'.$item->diagnosa_tambahan.'"> </div>
+                        
                         <a class="block font-medium text-base mt-5">Tindakan Medis</a>
-                        <p class="mb-5">'.$item->tindakan_medis.'</p>
+                        <div class="origindiv"> <p class="mb-5">'.$item->tindakan_medis.'</p> </div>
+                        <div class="editablediv" style="display:none;"> <input name="tindakan_medis" type="text" class="input border flex-1" style="background-color:whitesmoke; width:50%;" required value="'.$item->tindakan_medis.'"> </div>
 
                         <a class="block font-medium text-base mt-5">Catatan Khusus</a>
                         <table class="table mt-5">
@@ -286,37 +346,45 @@ class SpesialistikController extends Controller
                             <tbody>
                                 <tr>
                                     <td class="border-b dark:border-dark-5">Alergi</td>
-                                    <td class="border-b dark:border-dark-5">'.$item->alergi.'</td>
-                                </tr>
+                                    <td class="border-b dark:border-dark-5 origindiv">'.$item->alergi.'</td>
+                                    <td class="border-b dark:border-dark-5 editablediv" style="display:none;"> <input name="alergi" type="text" class="input border flex-1" style="background-color:whitesmoke; width:100%;" required value="'.$item->alergi.'"> </td>
+                                    <td class="border-b dark:border-dark-5 editablediv strict_id" style="display:none;"> <input name="id_catkhusus" type="text" class="input border flex-1" style="background-color:whitesmoke; width:100%;" required value="'.$item->id_catkhusus.'"> </td>
+                                    </tr>
                                 <tr>
                                     <td class="border-b dark:border-dark-5">Tranfusi</td>
-                                    <td class="border-b dark:border-dark-5">'.$item->tranfusi.'</td>
+                                    <td class="border-b dark:border-dark-5 origindiv">'.$item->tranfusi.'</td>
+                                    <td class="border-b dark:border-dark-5 editablediv" style="display:none;"> <input name="tranfusi" type="text" class="input border flex-1" style="background-color:whitesmoke; width:100%;" required value="'.$item->tranfusi.'"> </td>
                                 </tr>
                                 <tr>
                                     <td class="border-b dark:border-dark-5">Golongan darah</td>
-                                    <td class="border-b dark:border-dark-5">'.$item->gol_darah.'</td>
+                                    <td class="border-b dark:border-dark-5 origindiv">'.$item->gol_darah.'</td>
+                                    <td class="border-b dark:border-dark-5 editablediv" style="display:none;"> <input name="gol_darah" type="text" class="input border flex-1" style="background-color:whitesmoke; width:100%;" required value="'.$item->gol_darah.'"> </td>
                                 </tr>
                                 <tr>
                                     <td class="border-b dark:border-dark-5">Penyakit berat</td>
-                                    <td class="border-b dark:border-dark-5">'.$item->penyakit_berat.'</td>
+                                    <td class="border-b dark:border-dark-5 origindiv">'.$item->penyakit_berat.'</td>
+                                    <td class="border-b dark:border-dark-5 editablediv" style="display:none;"> <input name="penyakit_berat" type="text" class="input border flex-1" style="background-color:whitesmoke; width:100%;" required value="'.$item->penyakit_berat.'"> </td>
                                 </tr>
                                     <td class="border-b dark:border-dark-5">Penyakit menular</td>
-                                    <td class="border-b dark:border-dark-5">'.$item->penyakit_menular.'</td>
+                                    <td class="border-b dark:border-dark-5 origindiv">'.$item->penyakit_menular.'</td>
+                                    <td class="border-b dark:border-dark-5 editablediv" style="display:none;"> <input name="penyakit_menular" type="text" class="input border flex-1" style="background-color:whitesmoke; width:100%;" required value="'.$item->penyakit_menular.'"> </td>
                                 </tr>
-                
                             </tbody>
                         </table>
+                        
                         <a class="block font-medium text-base mt-5">Resep Obat</a>';
                         if(count($resepObatData)){
                             $output .=' 
                                 <table class="table mt-5">
                                     <thead>
                                         <tr class="bg-gray-200 text-gray-700">
+                                            <th style="display:none;" class="whitespace-no-wrap">ID</th>
                                             <th class="whitespace-no-wrap">Nama Obat</th>
                                             <th class="whitespace-no-wrap">Jenis Obat</th>
                                             <th class="whitespace-no-wrap">Dosis</th>
                                             <th class="whitespace-no-wrap">Satuan</th>
                                             <th class="whitespace-no-wrap">Catatan</th>
+                                            <th class="whitespace-no-wrap editablediv" style="display:none;">OPSI</th>
                                         </tr>
                                     </thead>
                                     <tbody>'.$resepObat.'</tbody>
@@ -327,7 +395,12 @@ class SpesialistikController extends Controller
                 }
             }
                 
-                    $output .='</div>';
+                    $output .='
+                            <div class="editablediv" style="display:none;">
+                                <a href="javascript:;" data-toggle="modal" data-target="#delete-modal-preview" class="button w-18 mr-1 mb-2 bg-theme-9 text-white editablediv">Simpan Perubahan Diagnosa</a>
+                                <button onclick="ubahcatatanrm(\'batalkan\')" type="button" class="button w-18 mr-1 mb-2 bg-gray-200 text-gray-600 editablediv">Batalkan Perubahan</button>
+                            </div>
+                        </div>';
             }
             else{
                 $output .='No results';
@@ -429,6 +502,7 @@ class SpesialistikController extends Controller
             }
         }
     }
+    
     public function cetak_pdf($idsps){
 
         $path = "/storage/images/logo_RS.jpg";
@@ -464,10 +538,56 @@ class SpesialistikController extends Controller
         $pdf = PDF::loadView("components.modal.cetak_rekammedis_pdf", ["pemsps"=> $pemeriksaanSpesialistik, "ck"=> $catatanKhusus, "ro"=> $resepObat, "dktpsn"=> $dktpsn, "photo"=> $path]);
         return $pdf->stream('doc.pdf');
 
-       
         // return view("components.modal.cetak_rekammedis_pdf", ["pemsps"=> $pemeriksaanSpesialistik, "ck"=> $catatanKhusus, "ro"=> $resepObat, "dktpsn"=> $dktpsn, "photo"=> $path]);
-
-
     }
-    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    public function rujukan(Request $request){
+        if($request->ajax()){
+            $data = DB::table('jadwal_dokter as jdw')
+            ->join('dokter', 'dokter.id_dokter', '=', 'jdw.id_dokter')
+            ->join('user', 'user.login_id', '=', 'dokter.login_id')
+            ->join('poli', 'poli.id_poli', '=', 'dokter.id_poli')
+            ->join('ruangan', 'ruangan.no_ruangan', '=', 'jdw.no_ruangan')
+            ->select('id_jdwdokter', 'dokter.id_dokter', 'dokter.nama', 'poli.nama as poli', 'lokasi','photo')
+            ->where('jdw.hari', '=', DB::raw('CASE 
+                WHEN DAYNAME(NOW()) = "Monday" THEN "senin"
+                WHEN DAYNAME(NOW()) = "Tuesday" THEN "selasa"
+                WHEN DAYNAME(NOW()) = "Wednesday" THEN "rabu"
+                WHEN DAYNAME(NOW()) = "Thursday" THEN "kamis"
+                WHEN DAYNAME(NOW()) = "Friday" THEN "jumat"
+                WHEN DAYNAME(NOW()) = "Saturday" THEN "sabtu"
+                WHEN DAYNAME(NOW()) = "Sunday" THEN "minggu"
+                ELSE NULL
+            END'))
+            ->whereRaw('TIME_FORMAT(jdw.akhir_praktek, "%H:%i") >= DATE_FORMAT(NOW(), "%H:%i")')
+            ->where('dokter.nama', 'LIKE', '%' . $request->searchdata . '%')
+            ->get();
+
+            return view ('contents.search.search_rujukan_dokter')->with('data', $data);
+        }
+    }
 }

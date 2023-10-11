@@ -93,6 +93,15 @@ class PendaftaranController extends Controller
     public function store(Request $request)
     {
         $tgllahir = date('Y-m-d', strtotime($request->tgl_lahir));
+        $array = explode(";", $request->id_jdwdokter);
+        $strPendaftaran = "INSERT INTO `pendaftaran` (`tgl_daftar`, `status`, `no_rekmed`, `id_jdwdokter`) VALUES";
+
+        foreach ($array as $item) {
+            $strPendaftaran .= "(CURDATE(),'Belum Periksa','".$request->no_rekmed."','".$item."')";
+        }
+
+        $strPendaftaran = str_replace(')(', '),(', $strPendaftaran);
+
         if($request->tambahpasien){
             DB::table('pasien')->insert([
                 'no_rekmed' => $request->no_rekmed,
@@ -105,12 +114,8 @@ class PendaftaranController extends Controller
             ]);
             
         }
-        DB::table('pendaftaran')->insert([
-            'tgl_daftar' => DB::raw('CURDATE()'),
-            'no_rekmed' => $request->no_rekmed, 
-            'id_jdwdokter' => $request->id_jdwdokter,
-            'status' => 'Belum Periksa',
-        ]);
+    
+        DB::statement($strPendaftaran);
         return redirect()->route('pendaftaran.index');
     }
 

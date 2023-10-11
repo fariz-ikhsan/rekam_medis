@@ -19,13 +19,14 @@ class VitalSignController extends Controller
     {
         if (!count($request->all())) {
             $dataPendaftaran = DB::table('pendaftaran')
-            ->select('pendaftaran.id_pendaftaran', 'pendaftaran.no_rekmed', 'pasien.nama', 'dokter.nama AS nama_dokter', 'ruangan.lokasi AS ruangan', 'vital_sign.id_vitalsign')
+            ->select('pasien.no_rekmed', 'pasien.nama', 'dokter.nama as nama_dokter', 'ruangan.lokasi as ruangan')
             ->join('pasien', 'pasien.no_rekmed', '=', 'pendaftaran.no_rekmed')
             ->join('jadwal_dokter', 'jadwal_dokter.id_jdwdokter', '=', 'pendaftaran.id_jdwdokter')
             ->join('dokter', 'dokter.id_dokter', '=', 'jadwal_dokter.id_dokter')
             ->join('ruangan', 'ruangan.no_ruangan', '=', 'jadwal_dokter.no_ruangan')
             ->leftJoin('vital_sign', 'vital_sign.id_pendaftaran', '=', 'pendaftaran.id_pendaftaran')
-            ->whereNull('vital_sign.id_vitalsign')
+            ->groupBy('pasien.no_rekmed')
+            ->havingRaw('pasien.no_rekmed IN (SELECT no_rekmed FROM pendaftaran LEFT JOIN vital_sign ON vital_sign.id_pendaftaran = pendaftaran.id_pendaftaran WHERE vital_sign.id_vitalsign IS NULL)')
             ->paginate(5);
             
             return view ('contents.transaksi.data_vital_sign')->with('data', $dataPendaftaran);
@@ -45,6 +46,7 @@ class VitalSignController extends Controller
                             ->orWhere('pasien.nama', 'like', '%' . $searchData . '%');
                     })
                     ->whereNull('vital_sign.id_vitalsign')
+                    ->distinct('pendaftaran.no_rekmed')
                     ->paginate(5);
                     return view ('contents.search.search_vitalsign')->with('data', $data);
             }
@@ -65,20 +67,26 @@ class VitalSignController extends Controller
      */
     public function store(Request $request)
     {
-        $noRekmed = DB::table('pendaftaran')
-    ->select('no_rekmed')
-    ->where('id_pendaftaran', $request->id_pendaftaran)
-    ->first();
-        DB::table('vital_sign')->insert([
-            'id_vitalsign' =>"vs-".$noRekmed->no_rekmed."-".$request->id_pendaftaran,
-            'berat_badan' => $request->berat_badan,
-            'tekanan_darah' => $request->tekanan_darah,
-            'denyut_nadi' => $request->denyut_nadi,
-            'spo2' => $request->spo2,
-            'suhu' => $request->suhu,
-            'respiration_rate' => $request->respiration_rate,
-            'id_pendaftaran' => $request->id_pendaftaran
-        ]);
+        $strVS = "INSERT INTO `vital_sign` (`id_vitalsign`, `berat_badan`, `tekanan_darah`, `denyut_nadi`, `spo2`, `suhu`, `respiration_rate`, `id_pendaftaran`) VALUES";
+
+        $pdfcheck =DB::table('pendaftaran')
+        ->leftJoin('vital_sign', 'vital_sign.id_pendaftaran', '=', 'pendaftaran.id_pendaftaran')
+        ->whereNull('vital_sign.id_vitalsign')
+        ->where('pendaftaran.no_rekmed', $request->id_pendaftaran)
+        ->select('pendaftaran.id_pendaftaran')
+        ->get();
+
+        foreach ($pdfcheck as $item) {
+            // Access the id_pendaftaran property of the stdClass object
+            $id_pendaftaran = $item->id_pendaftaran;
+        
+            // Concatenate the properties to the string
+            $strVS .= "('vs-" . $request->id_pendaftaran . "-" . $id_pendaftaran . "','" . $request->berat_badan . "','" . $request->tekanan_darah . "','" . $request->denyut_nadi . "','" . $request->spo2 . "','" . $request->suhu . "','" . $request->respiration_rate . "','" . $id_pendaftaran . "')";
+        }
+
+        $strVS = str_replace(')(', '),(', $strVS);
+        DB::statement($strVS);
+        
         return redirect()->route('vitalsign.index');
     }
 

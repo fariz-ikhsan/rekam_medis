@@ -48,7 +48,7 @@
                     @foreach($data as $index => $item)
                         <tr class="intro-x">
                             <td id="idpendaftaran" style="display:none;">
-                                {{ $item->id_pendaftaran }}
+                                {{ $item->no_rekmed }}
                             </td>
                             <td class="font-medium whitespace-no-wrap">
                                 {{ $item->no_rekmed }}

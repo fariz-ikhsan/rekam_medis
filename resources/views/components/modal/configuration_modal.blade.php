@@ -94,8 +94,6 @@
         });
 
         if(role == "pendaftaran" ){
-            $('#divExecuteSelect button:eq(1)').attr('id', "executeSelectBtnOnclick");
-            $('#divExecuteSelect button:eq(1)').removeAttr("type");
             formElement.attr('action', "pendaftaran");
             $("#selectForm").append(
                 $("<input>")
@@ -106,8 +104,8 @@
                     })
             );
         }else if(role == "pendaftaran-tambahpasien"){
-            $('#divExecuteSelect button:eq(1)').removeAttr("id");
-            $('#divExecuteSelect button:eq(1)').attr('type', "submit");
+            // $('#divExecuteSelect button:eq(1)').removeAttr("id");
+            // $('#divExecuteSelect button:eq(1)').attr('type', "submit");
             formElement.attr('action', "pendaftaran");
             
             $("#selectForm").append(
