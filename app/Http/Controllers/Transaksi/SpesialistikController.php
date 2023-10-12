@@ -413,13 +413,13 @@ class SpesialistikController extends Controller
     public function storePemeriksaan($id, Request $request)
     {
         $pattern = '/<div>(.*?)<\/div>/'; // Regex pattern untuk mencari dan menghapus tag <div> dan </div>
-        $dt = preg_replace($pattern, '$1', $request->diagnosa_tambahan);
-        $tm = preg_replace($pattern, '$1', $request->tindakan_medis);
-
+        $dt = preg_replace($pattern, '$1', $request->diagnosa_tambahan_);
+        $tm = preg_replace($pattern, '$1', $request->tindakan_medis_);
+      
         DB::table('pemeriksaan_spesialistik')->insert([
             'id_spesialistik' => 'sps-'.substr($id, 3),
-            'diagnosa_utama' => $request->diagnosa_utama,
-            'komplikasi' =>  $request->komplikasi,
+            'diagnosa_utama' => $request->diagnosa_utama_,
+            'komplikasi' =>  $request->komplikasi_,
             'diagnosa_tambahan' =>  $dt,
             'tindakan_medis' => $tm,
             'id_vitalsign' => $id
@@ -429,15 +429,15 @@ class SpesialistikController extends Controller
             DB::statement($request->resep_obat_value);
         }
        
-        if( $request->alergi || $request->tranfusi || $request->golongan_darah || $request->penyakit_berat|| $request->penyakit_menular )
+        if( $request->alergi_ || $request->tranfusi_ || $request->golongan_darah_ || $request->penyakit_berat_ || $request->penyakit_menular_ )
         {
             DB::table('catatan_khusus')->insert([
                 'id_catkhusus' => null, 
-                'alergi' => $request->alergi, 
-                'tranfusi' => $request->tranfusi, 
-                'gol_darah' => $request->golongan_darah, 
-                'penyakit_berat' => $request->penyakit_berat, 
-                'penyakit_menular' => $request->penyakit_menular, 
+                'alergi' => $request->alergi_, 
+                'tranfusi' => $request->tranfusi_, 
+                'gol_darah' => $request->golongan_darah_, 
+                'penyakit_berat' => $request->penyakit_berat_, 
+                'penyakit_menular' => $request->penyakit_menular_, 
                 'id_spesialistik' => 'sps-'.substr($id, 3), 
             ]);
         }

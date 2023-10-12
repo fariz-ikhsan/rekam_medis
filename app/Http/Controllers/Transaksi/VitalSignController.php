@@ -76,7 +76,7 @@ class VitalSignController extends Controller
                 ->havingRaw(' pasien.no_rekmed LIKE "%'.$searchData.'%" OR pasien.nama LIKE "%'.$searchData.'%" AND pasien.no_rekmed IN (SELECT no_rekmed FROM pendaftaran LEFT JOIN vital_sign ON vital_sign.id_pendaftaran = pendaftaran.id_pendaftaran WHERE vital_sign.id_vitalsign IS NULL)')
                 ->paginate(5);
 
-                return view ('contents.search.search_vitalsign')->with(['data'=> $data, 'namadokter'=> $doctorMap]);
+                return view ('contents.search.search_vitalsign')->with(['data'=> $data, 'namadokter'=> $doctorMap, 'ruangan'=> $ruanganMap]);
             }
         }
             

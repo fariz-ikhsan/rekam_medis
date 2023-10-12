@@ -32,21 +32,21 @@
                 <div class="grid grid-cols-12 gap-4 row-gap-5 mt-5">
                     <div class="intro-y col-span-12 sm:col-span-6">
                         <div class="mb-2">Diagnosa Utama</div>
-                        <input name="diagnosa_utama" type="text" class="input w-full border flex-1" style="background-color:whitesmoke;" required>
+                        <input name="diagnosa_utama_" type="text" class="input w-full border flex-1" style="background-color:whitesmoke;" required>
                     </div>
                     <div class="intro-y col-span-12 sm:col-span-6">
                         <div class="mb-2">Komplikasi</div>
-                        <input name="komplikasi" type="text" class="input w-full border flex-1" style="background-color:whitesmoke;" required>
+                        <input name="komplikasi_" type="text" class="input w-full border flex-1" style="background-color:whitesmoke;" required>
                     </div>
                     <div class="intro-y col-span-12 sm:col-span-6">
                         <div class="mb-2">Diagnosa Tambahan</div>
                         <div id="txtEditor_diagnosaTambahan"  style="height: 100px;"></div>
-                        <input id="diagnosa_tambahan_value" type="hidden" name="diagnosa_tambahan">
+                        <input id="diagnosa_tambahan_value" type="hidden" name="diagnosa_tambahan_">
                     </div>
                     <div class="intro-y col-span-12 sm:col-span-6">
                         <div class="mb-2">Tindakan Medis</div>
                         <div id="txtEditor_tindakanMedis" style="height: 100px;"></div>
-                        <input id="tindakan_medis_value" type="hidden" name="tindakan_medis">
+                        <input id="tindakan_medis_value" type="hidden" name="tindakan_medis_">
                     </div>
                     <div class="intro-y col-span-12 flex items-center justify-center sm:justify-end mt-5">
                         <button type="button" onclick="catatanKhususSession()" class="button w-24 justify-center block bg-theme-1 text-white ml-2">Lanjut</button>
@@ -59,23 +59,23 @@
                 <div class="grid grid-cols-12 gap-4 row-gap-5 mt-5">
                     <div class="intro-y col-span-12 sm:col-span-6">
                         <div class="mb-2">Alergi</div>
-                        <input name="alergi" type="text" class="input w-full border flex-1" style="background-color:whitesmoke;">
+                        <input name="alergi_" type="text" class="input w-full border flex-1" style="background-color:whitesmoke;">
                     </div>
                     <div class="intro-y col-span-12 sm:col-span-6">
                         <div class="mb-2">Tranfusi</div>
-                        <input name="tranfusi" type="text" class="input w-full border flex-1" style="background-color:whitesmoke;">
+                        <input name="tranfusi_" type="text" class="input w-full border flex-1" style="background-color:whitesmoke;">
                     </div>
                     <div class="intro-y col-span-12 sm:col-span-6">
                         <div class="mb-2">Golongan Darah</div>
-                        <input name="golongan_darah" type="text" class="input w-full border flex-1" style="background-color:whitesmoke;">
+                        <input name="golongan_darah_" type="text" class="input w-full border flex-1" style="background-color:whitesmoke;">
                     </div>
                     <div class="intro-y col-span-12 sm:col-span-6">
                         <div class="mb-2">Penyakit Berat</div>
-                        <input name="penyakit_berat" type="text" class="input w-full border flex-1" style="background-color:whitesmoke;">
+                        <input name="penyakit_berat_" type="text" class="input w-full border flex-1" style="background-color:whitesmoke;">
                     </div>
                     <div class="intro-y col-span-12 sm:col-span-6">
                         <div class="mb-2">Penyakit Menular</div>
-                        <input name="penyakit_menular" type="text" class="input w-full border flex-1" style="background-color:whitesmoke;">
+                        <input name="penyakit_menular_" type="text" class="input w-full border flex-1" style="background-color:whitesmoke;">
                     </div>
                     <div class="intro-y col-span-12 flex items-center justify-center sm:justify-end mt-5">
                         <button type="button" onclick="diagnosaSession()" class="button w-24 justify-center block bg-gray-200 text-gray-600 dark:bg-dark-1 dark:text-gray-300">Kembali</button>
@@ -183,15 +183,15 @@
             var lastSegment = segments[segments.length - 1];
 
             $("#btnSubmitExecutor").click(function() {
-                var diagnosaUtamaInput = $('input[name="diagnosa_utama"]').val();
-                var komplikasiInput = $('input[name="komplikasi"]').val();
+                var diagnosaUtamaInput = $('input[name="diagnosa_utama_"]').val();
+                var komplikasiInput = $('input[name="komplikasi_"]').val();
                 var diagnosaTambahanInput = $("#txtEditor_diagnosaTambahan .ql-editor").text()
                 var tindakanMedisInput = $("#txtEditor_tindakanMedis .ql-editor").text()
-                var alergiInput = $('input[name="alergi"]').val();
-                var tranfusiInput = $('input[name="tranfusi"]').val();
-                var golonganDarahInput = $('input[name="golongan_darah"]').val();
-                var penyakitBeratInput = $('input[name="penyakit_berat"]').val();
-                var penyakitMenularInput = $('input[name="penyakit_menular"]').val();
+                var alergiInput = $('input[name="alergi_"]').val();
+                var tranfusiInput = $('input[name="tranfusi_"]').val();
+                var golonganDarahInput = $('input[name="golongan_darah_"]').val();
+                var penyakitBeratInput = $('input[name="penyakit_berat_"]').val();
+                var penyakitMenularInput = $('input[name="penyakit_menular_"]').val();
 
                 $("#tdDU").text(": "+diagnosaUtamaInput);
                 $("#tdKP").text(": "+komplikasiInput);
@@ -272,8 +272,8 @@
             var form = document.querySelector('#formRequestor');
             form.onsubmit = function() {
                 // Ambil konten dari setiap editor dan simpan dalam input yang sesuai
-                document.querySelector('input[name=diagnosa_tambahan]').value = quill1.root.innerHTML;
-                document.querySelector('input[name=tindakan_medis]').value = quill2.root.innerHTML;
+                document.querySelector('input[name=diagnosa_tambahan_]').value = quill1.root.innerHTML;
+                document.querySelector('input[name=tindakan_medis_]').value = quill2.root.innerHTML;
             };
              
         $("#btnPemeriksaanDiagnosa").click()
@@ -291,8 +291,8 @@
         }
         
         function catatanKhususSession(){
-            var val_du = $('input[name="diagnosa_utama"]').val().length
-            var val_kp = $('input[name="komplikasi"]').val().length
+            var val_du = $('input[name="diagnosa_utama_"]').val().length
+            var val_kp = $('input[name="komplikasi_"]').val().length
             $("#btnSubmit").css("display","none")
 
             if(val_du != 0 && val_kp != 0 ){
@@ -309,8 +309,8 @@
         }
 
         function resepObatSession(){
-            var val_du = $('input[name="diagnosa_utama"]').val().length
-            var val_kp = $('input[name="komplikasi"]').val().length
+            var val_du = $('input[name="diagnosa_utama_"]').val().length
+            var val_kp = $('input[name="komplikasi_"]').val().length
             $("#btnSubmit").css("display","")
 
             if(val_du != 0 && val_kp != 0 ){

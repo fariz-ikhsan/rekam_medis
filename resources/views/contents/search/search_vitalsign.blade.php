@@ -23,10 +23,28 @@
                         {{ $item->nama }}
                     </td>
                     <td class="font-medium whitespace-no-wrap">
-                        {{ $item->nama_dokter }}
+                        @foreach ($namadokter as $noRekmed => $doctors)
+                            @if($noRekmed == $item->no_rekmed)
+                                @foreach ($doctors as $doctor)
+                                    {{ $doctor }}
+                                    @if (!$loop->last)
+                                        {{ ', ' }}
+                                    @endif
+                                @endforeach
+                            @endif
+                        @endforeach
                     </td>
                     <td class="font-medium whitespace-no-wrap">
-                        {{ $item->ruangan }}
+                        @foreach ($ruangan as $noRekmed => $ruangann)
+                            @if($noRekmed == $item->no_rekmed)
+                                @foreach ($ruangann as $lokasi)
+                                    {{ $lokasi }}
+                                    @if (!$loop->last)
+                                        {{ ', ' }}
+                                    @endif
+                                @endforeach
+                            @endif
+                        @endforeach
                     </td>
                     <td>
                         <div class="flex justify-center items-center">
