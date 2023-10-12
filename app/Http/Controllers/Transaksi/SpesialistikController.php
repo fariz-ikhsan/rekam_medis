@@ -180,10 +180,13 @@ class SpesialistikController extends Controller
                         ->select('vs.id_vitalsign','pdf.no_rekmed', 'pdf.tgl_daftar', 'vs.berat_badan', 'vs.tekanan_darah', 'vs.denyut_nadi', 'vs.spo2', 'vs.suhu', 'vs.respiration_rate', 'pemsps.diagnosa_utama', 'pemsps.komplikasi', 'pemsps.diagnosa_tambahan', 'pemsps.tindakan_medis')
                         ->join('pendaftaran AS pdf', 'pdf.id_pendaftaran', '=', 'vs.id_pendaftaran')
                         ->join('pemeriksaan_spesialistik AS pemsps', 'pemsps.id_vitalsign', '=', 'vs.id_vitalsign')
+                        ->join('jadwal_dokter AS jdw', 'jdw.id_jdwdokter', '=', 'pdf.id_jdwdokter')
+                        ->join('dokter AS dkt', 'dkt.id_dokter', '=', 'jdw.id_dokter')
                         ->where('pdf.no_rekmed', '=', $no_rm->no_rekmed)
                         ->where(function ($query) use ($searchData) {
                             $query->where('pemsps.diagnosa_utama', 'LIKE', '%' . $searchData . '%')
-                                ->orWhere('pemsps.komplikasi', 'LIKE', '%' . $searchData . '%');
+                                ->orWhere('pemsps.komplikasi', 'LIKE', '%' . $searchData . '%')
+                                ->orWhere('dkt.nama', 'LIKE', '%' . $searchData . '%');
                         })
                         ->whereBetween('pdf.tgl_daftar', [$startDate, $endDate])
                         ->orderBy('pdf.tgl_daftar', 'desc')

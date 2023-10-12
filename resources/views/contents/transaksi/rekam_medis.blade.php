@@ -63,7 +63,7 @@
                   <div class="intro-y pr-1">
                       <div class="box p-2">
                           <div class="relative text-gray-700 dark:text-gray-300">
-                              <input id="cariInput" name="cari" type="text" class="input input--lg w-full bg-gray-200 pr-10 placeholder-theme-13" placeholder="Cari diagnosa...">
+                              <input id="cariInput" name="cari" type="text" class="input input--lg w-full bg-gray-200 pr-10 placeholder-theme-13" placeholder="Cari diagnosa/nama dokter...">
                               <i class="w-4 h-4 hidden sm:absolute my-auto inset-y-0 mr-3 right-0" data-feather="search"></i> 
                           </div>
                       </div>
