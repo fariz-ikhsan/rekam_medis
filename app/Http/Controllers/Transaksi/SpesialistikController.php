@@ -536,7 +536,7 @@ class SpesialistikController extends Controller
         // return $pdf->stream('doc.pdf');
        
         $pdf = PDF::loadView("components.modal.cetak_rekammedis_pdf", ["pemsps"=> $pemeriksaanSpesialistik, "ck"=> $catatanKhusus, "ro"=> $resepObat, "dktpsn"=> $dktpsn, "photo"=> $path]);
-        return $pdf->stream('doc.pdf');
+        return $pdf->stream($idsps.'.pdf');
 
         // return view("components.modal.cetak_rekammedis_pdf", ["pemsps"=> $pemeriksaanSpesialistik, "ck"=> $catatanKhusus, "ro"=> $resepObat, "dktpsn"=> $dktpsn, "photo"=> $path]);
     }

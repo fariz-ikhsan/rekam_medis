@@ -17,6 +17,37 @@ class VitalSignController extends Controller
      */
     public function index(Request $request)
     {
+            $results = DB::select('
+            SELECT dokter.nama, no_rekmed, lokasi
+            FROM pendaftaran
+            LEFT JOIN vital_sign ON vital_sign.id_pendaftaran = pendaftaran.id_pendaftaran
+            JOIN jadwal_dokter ON jadwal_dokter.id_jdwdokter = pendaftaran.id_jdwdokter
+            JOIN dokter ON dokter.id_dokter = jadwal_dokter.id_dokter
+            JOIN ruangan ON ruangan.no_ruangan = jadwal_dokter.no_ruangan
+            WHERE vital_sign.id_vitalsign IS NULL
+            ');
+
+            $doctorMap = [];
+            foreach ($results as $result) {
+                $noRekmed = $result->no_rekmed;
+                $nama = $result->nama;
+                $lokasi = $result->lokasi;
+                if (!isset($doctorMap[$noRekmed])) {
+                    $doctorMap[$noRekmed] = [];
+                }
+                $doctorMap[$noRekmed][] = $nama;
+            }
+
+            $ruanganMap = [];
+            foreach ($results as $result) {
+                $noRekmed = $result->no_rekmed;
+                $lokasi = $result->lokasi;
+                if (!isset($ruanganMap[$noRekmed])) {
+                    $ruanganMap[$noRekmed] = [];
+                }
+                $ruanganMap[$noRekmed][] = $lokasi;
+            }
+
         if (!count($request->all())) {
             $dataPendaftaran = DB::table('pendaftaran')
             ->select('pasien.no_rekmed', 'pasien.nama', 'dokter.nama as nama_dokter', 'ruangan.lokasi as ruangan')
@@ -29,26 +60,23 @@ class VitalSignController extends Controller
             ->havingRaw('pasien.no_rekmed IN (SELECT no_rekmed FROM pendaftaran LEFT JOIN vital_sign ON vital_sign.id_pendaftaran = pendaftaran.id_pendaftaran WHERE vital_sign.id_vitalsign IS NULL)')
             ->paginate(5);
             
-            return view ('contents.transaksi.data_vital_sign')->with('data', $dataPendaftaran);
+            return view ('contents.transaksi.data_vital_sign')->with(['data'=> $dataPendaftaran, 'namadokter'=>$doctorMap, 'ruangan'=> $ruanganMap]);
         }else{
             
             if($request->ajax()){
                 $searchData = $request->searchdata;
-                $data = DB::table('pendaftaran')
-                    ->select('pendaftaran.id_pendaftaran', 'pendaftaran.no_rekmed', 'pasien.nama', 'dokter.nama AS nama_dokter', 'ruangan.lokasi AS ruangan', 'vital_sign.id_vitalsign')
-                    ->join('pasien', 'pasien.no_rekmed', '=', 'pendaftaran.no_rekmed')
-                    ->join('jadwal_dokter', 'jadwal_dokter.id_jdwdokter', '=', 'pendaftaran.id_jdwdokter')
-                    ->join('dokter', 'dokter.id_dokter', '=', 'jadwal_dokter.id_dokter')
-                    ->join('ruangan', 'ruangan.no_ruangan', '=', 'jadwal_dokter.no_ruangan')
-                    ->leftJoin('vital_sign', 'vital_sign.id_pendaftaran', '=', 'pendaftaran.id_pendaftaran')
-                    ->where(function($data) use ($searchData) {
-                        $data->where('pasien.no_rekmed', 'like', '%' . $searchData . '%')
-                            ->orWhere('pasien.nama', 'like', '%' . $searchData . '%');
-                    })
-                    ->whereNull('vital_sign.id_vitalsign')
-                    ->distinct('pendaftaran.no_rekmed')
-                    ->paginate(5);
-                    return view ('contents.search.search_vitalsign')->with('data', $data);
+                $data =DB::table('pendaftaran')
+                ->select('pasien.no_rekmed', 'pasien.nama', 'dokter.nama as nama_dokter', 'ruangan.lokasi as ruangan')
+                ->join('pasien', 'pasien.no_rekmed', '=', 'pendaftaran.no_rekmed')
+                ->join('jadwal_dokter', 'jadwal_dokter.id_jdwdokter', '=', 'pendaftaran.id_jdwdokter')
+                ->join('dokter', 'dokter.id_dokter', '=', 'jadwal_dokter.id_dokter')
+                ->join('ruangan', 'ruangan.no_ruangan', '=', 'jadwal_dokter.no_ruangan')
+                ->leftJoin('vital_sign', 'vital_sign.id_pendaftaran', '=', 'pendaftaran.id_pendaftaran')
+                ->groupBy('pasien.no_rekmed')
+                ->havingRaw(' pasien.no_rekmed LIKE "%'.$searchData.'%" OR pasien.nama LIKE "%'.$searchData.'%" AND pasien.no_rekmed IN (SELECT no_rekmed FROM pendaftaran LEFT JOIN vital_sign ON vital_sign.id_pendaftaran = pendaftaran.id_pendaftaran WHERE vital_sign.id_vitalsign IS NULL)')
+                ->paginate(5);
+
+                return view ('contents.search.search_vitalsign')->with(['data'=> $data, 'namadokter'=> $doctorMap]);
             }
         }
             
