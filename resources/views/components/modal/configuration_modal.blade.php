@@ -306,11 +306,13 @@
                if(count == 0){
                     element.className= "input w-full border mt-2 flex-1"
                     $('#simpanCreateFormBtn').attr('type', 'submit');
+                    $('#selectForm').attr('onsubmit', 'return true;');
                     $('#divExecuteSelect button:eq(1)').attr('type', "submit");
                }else if(count > 0){
                     element.className="input w-full border border-theme-6 mt-2"
                     alert("ID atau No Rekam Medis Sudah Ada")
                     $('#simpanCreateFormBtn').attr('type', 'button');
+                    $('#selectForm').attr('onsubmit', 'return false;');
                     $('#divExecuteSelect button:eq(1)').attr('type', "button");
                }
             }
