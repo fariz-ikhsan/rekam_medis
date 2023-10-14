@@ -52,16 +52,18 @@
             if (isSelect) {
                 jadwalIdDokter = arrayListJdwDokter.join(";");
                 $("#idjdwdokter_pasienbaru").val(jadwalIdDokter);
-                
+
                 $div.css("display", "none");
-                $("#selectForm").append(
+                if ($("#selectForm input[name='id_jdwdokter']").length === 0) {
+                    $("#selectForm").append(
                     $("<input>")
                         .attr({
                             "type": "hidden",
                             "name": "id_jdwdokter",
                             "value": jadwalIdDokter,
                         })
-                );
+                    );
+                }
 
                 $("#selectForm").submit();
             } else {
