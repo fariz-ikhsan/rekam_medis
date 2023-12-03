@@ -14,7 +14,7 @@
     <tbody>
         @foreach($data as $index => $item)
             <tr class="intro-x">
-                <td class="font-medium whitespace-no-wrap">{{ $item->no_rekmed }}</td>
+                <td id="masalahrm"class="font-medium whitespace-no-wrap">{{ $item->no_rekmed }}</td>
                 <td class="font-medium whitespace-no-wrap">{{ $item->nama }}</td>
                 <td class="font-medium whitespace-no-wrap">{{ \Carbon\Carbon::parse($item->tgl_lahir)->format("j M, Y") }}</td>
                 <td class="font-medium whitespace-no-wrap">{{ $item->jenis_kelamin }}</td>

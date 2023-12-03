@@ -24,7 +24,8 @@ class DataPasienController extends Controller
         }
         else{
             if($request->ajax() ){
-                    $data=Pasien::where('no_rekmed','like','%'.$request->searchdata.'%')->paginate(10)->withQueryString();
+                    $data= DB::table('pasien')
+                    ->where('no_rekmed','like','%'.$request->searchdata.'%')->paginate(10);
 
                     return view ('contents.search.searchmaster_pasien')->with('data', $data);
             }
