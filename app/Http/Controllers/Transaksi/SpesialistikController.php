@@ -525,7 +525,7 @@ class SpesialistikController extends Controller
             ->get();
 
         $dktpsn = DB::table('pemeriksaan_spesialistik AS pemsps')
-        ->select('pasien.no_rekmed', 'pasien.nama AS nama_psn', 'dokter.nama AS nama_dkt', 'pendaftaran.tgl_daftar')
+        ->select('pasien.no_rekmed', 'pasien.nama AS nama_psn', 'dokter.nama AS nama_dkt', 'pendaftaran.tgl_daftar', 'pasien.tgl_lahir', 'pasien.jenis_kelamin')
         ->join('vital_sign AS vs', 'vs.id_vitalsign', '=', 'pemsps.id_vitalsign')
         ->join('pendaftaran', 'pendaftaran.id_pendaftaran', '=', 'vs.id_pendaftaran')
         ->join('pasien', 'pasien.no_rekmed', '=', 'pendaftaran.no_rekmed')

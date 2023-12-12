@@ -44,9 +44,25 @@
                 color: #000000;
             }
 
+            .rectangle {
+                text-align: center;
+                position: relative;
+                height: 125px;
+                border: 1px solid #000;
+            }
+            .ttd-wrapper {
+                position: absolute;
+                bottom: 1;
+                width: 100%;
+                text-align: center;
+            }
+            #ttd {
+                display: inline-block;
+                background-color: #fff;
+                padding: 5px 10px;
+            }
 
-
-
+    
 
         </style>
     </head>
@@ -83,13 +99,8 @@
                 <td>: {{ $value->nama_psn }} </td>
             </tr>
             <tr>
-                <td>Pemeriksa</td>
-                <td>: {{ $value->nama_dkt }}</td>
-
-            </tr>
-            <tr>
-                <td>Tanggal Periksa</td>
-                <td>: {{ $value->tgl_daftar }}</td>
+                <td>Tanggal Lahir</td>
+                <td>: {{ $value->tgl_lahir }}</td>
          @endforeach
             </tr>
         </table>
@@ -183,6 +194,32 @@
         @endif
         </div>
     </div>
+    <table>
+        <thead>
+            <tr>
+                <th>Nama Dokter Pemeriksa</th>
+                <th>Tanda Tangan</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach($dktpsn as $value)
+            <tr>
+                <td style="width: 450px">
+                    <div class="rectangle">{{$value->nama_dkt}}</div>
+                </td>
+                <td style="width: 250px">
+                    <div class="rectangle">
+                        <div class="ttd-wrapper">
+                            <div id="ttd">{{ \Carbon\Carbon::parse($value->tgl_daftar)->isoFormat('D MMMM YYYY') }}</div>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            @endforeach
+        </tbody>
+    </table>
+    
+        
 </div>
     </body>
 </html>
